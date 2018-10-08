@@ -1,0 +1,12 @@
+name:  ml-notifier
+version: 0.0.2
+author: Mutlu Polatcan
+author_email: mutlupolatcan@gmail.com
+description: ML Notification tool for experiments"
+long_description_path: README.md
+long_description_content_type: text/markdown
+url: https://github.com/mpolatcan/ml-notifier
+classifiers:
+  - "Programming Language :: Python :: 3"
+  - "License :: OSI Approved :: Apache Software License"
+  - "Operating System :: OS Independent"
