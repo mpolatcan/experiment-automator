@@ -1,3 +1,3 @@
-# ML Notifier
+# Experiment Automator
 
-Simple ML notification tool for experiments.
+Experiment automation for ML pipelines

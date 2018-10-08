@@ -3,8 +3,6 @@ import yaml
 
 config = yaml.load(open("config.yml"))
 
-print(config)
-
 with open(config["long_description_path"], "r") as fh:
     long_description = fh.read()
 

@@ -1,0 +1,52 @@
+# Experiment Automator config example for statsmodels's Holt Winters
+# Range type -> [(min,max,precision(number of values)]
+
+experiment:
+  name: "holt-winters-experiment"
+  params:
+    # ------------- MODEL PARAMS --------------
+    trend:
+      - "add"
+      - "mul"
+      - null
+    seasonal:
+      - "add"
+      - "mul"
+      - null
+    seasonal_periods:
+      range: [0.1,0.9,0.1]
+  # ------------- FIT PARAMS --------------
+    smoothing_level:
+      range: [0.1,0.9,0.1]
+    smoothing_slope:
+      range: [0.1,0.9,0.1]
+    smoothing_seasonal:
+      range: [0.1,0.9,0.1]
+    damping_slope:
+      range: [0.1,0.9,0.1]
+    optimized:
+      - true
+      - false
+    use_box_cox:
+      - true
+      - false
+    remove_bias:
+      - true
+      - false
+    use_basinhopping:
+      - true
+      - false
+
+# TODO Slack notification settings will be updated
+slack:
+  webhook_url:
+  notification_format:
+
+# TODO CSV saving and formatting settings will be updated
+csv:
+  filename:
+  format:
+
+# TODO Drive service settings will be updated
+drive:
+  auth:
