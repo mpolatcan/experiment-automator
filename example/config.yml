@@ -14,16 +14,16 @@ experiment:
       - "mul"
       - null
     seasonal_periods:
-      range: [0.1,0.9,0.1]
+      range: [0.1,0.9,0.2]
   # ------------- FIT PARAMS --------------
     smoothing_level:
-      range: [0.1,0.9,0.1]
+      range: [0.1,0.9,0.2]
     smoothing_slope:
-      range: [0.1,0.9,0.1]
+      range: [0.1,0.9,0.2]
     smoothing_seasonal:
-      range: [0.1,0.9,0.1]
+      range: [0.1,0.9,0.2]
     damping_slope:
-      range: [0.1,0.9,0.1]
+      range: [0.1,0.9,0.2]
     optimized:
       - true
       - false
@@ -39,8 +39,23 @@ experiment:
 
 # TODO Slack notification settings will be updated
 slack:
-  webhook_url:
+  webhook_url: https://hooks.slack.com/services/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
   notification_format:
+    fail:
+      pretext: "FAILED"
+      title: "Test for Experiment Automator"
+      text: "Test for Experiment Automator"
+      color: "red"
+      footer: "Experiment Automator"
+      ts: true
+    success:
+      pretext: "SUCCESS"
+      title: "Test for Experiment Automator"
+      text: "Test"
+      color: "green"
+      footer: "Experiment Automator"
+      ts: true
+
 
 # TODO CSV saving and formatting settings will be updated
 csv:
@@ -49,4 +64,5 @@ csv:
 
 # TODO Drive service settings will be updated
 drive:
-  auth:
+
+debug: true
