@@ -2,7 +2,8 @@
 # Range type -> [(min,max,precision(number of values)]
 
 experiment:
-  name: "holt-winters-experiment"
+  name: "test-experiment"
+  workdir: "/Users/mutlu.polatcan/"
   params:
     # ------------- MODEL PARAMS --------------
     trend:
@@ -37,8 +38,7 @@ experiment:
       - true
       - false
 
-# TODO Slack notification settings will be updated
-slack:
+#slack:
   webhook_url: https://hooks.slack.com/services/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
   notification_format:
     fail:
@@ -59,10 +59,16 @@ slack:
 
 # TODO CSV saving and formatting settings will be updated
 csv:
-  filename:
-  format:
+  status: "enabled"
+  csv_format:
+    separator: "-"
+    columns:
+      - "name"
+      - "surname"
+      - "use_basinhopping"
 
 # TODO Drive service settings will be updated
 drive:
 
+# Debug mode for development. It is not used in production.
 debug: true
