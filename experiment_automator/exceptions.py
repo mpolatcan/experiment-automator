@@ -3,6 +3,6 @@ class ConfigNotFoundException(Exception):
         super().__init__(message)
 
 
-class WorkdirDoesNotExistException(Exception):
+class WorkingDirectoryDoesNotExistException(Exception):
     def __init__(self, message):
         super().__init__(message)

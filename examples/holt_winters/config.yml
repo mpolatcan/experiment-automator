@@ -1,4 +1,4 @@
-# Experiment Automator config example for statsmodels's Holt Winters
+# Experiment Automator config examples for statsmodels's Holt Winters
 # Range type -> [(min,max,precision(number of values)]
 
 experiment:
@@ -57,7 +57,6 @@ experiment:
       ts: true
 
 
-# TODO CSV saving and formatting settings will be updated
 csv:
   status: "enabled"
   csv_format:

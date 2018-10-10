@@ -59,3 +59,6 @@ class Constants:
     KEY_DRIVE = "drive"
     # --------------------------- Other Constants ------------------
     KEY_DEBUG = "debug"
+    KEY_DEBUG_TRACEBACK = "debug_traceback"
+    EXECUTION_STATUS_SUCCESS = "SUCCESS"
+    EXECUTION_STATUS_FAILED = "FAILED"

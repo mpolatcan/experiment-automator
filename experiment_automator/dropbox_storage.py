@@ -1,5 +1,7 @@
-# TODO Google Drive storage integration
-class GoogleDriveStorage:
+# TODO Dropbox storage integration
+
+
+class DropboxStorage:
     def __init__(self):
         pass
 

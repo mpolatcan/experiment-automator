@@ -1,0 +1,51 @@
+# Experiment Automator config examples for statsmodels's Holt Winters
+# Range type -> [(min,max,precision(number of values)]
+
+experiment:
+  name: "arima-experiment"
+  workdir: "/Users/mutlu.polatcan/"
+  params:
+  # ------------- MODEL PARAMS --------------
+    data_path:
+      - "../../example_datas/example_data.csv"
+    train_data_percentage:
+      range: [60,75,5]
+    arima_p_value:
+      range: [1,5,1]
+    arima_q_value:
+      range: [1,5,1]
+    arima_d_value:
+      range: [1,2,1]
+  # ------------- FIT PARAMS --------------
+
+
+#slack:
+  webhook_url: https://hooks.slack.com/services/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
+  notification_format:
+    fail:
+      pretext: "FAILED"
+      title: "Test for Experiment Automator"
+      text: "Test for Experiment Automator"
+      color: "red"
+      footer: "Experiment Automator"
+      ts: true
+    success:
+      pretext: "SUCCESS"
+      title: "Test for Experiment Automator"
+      text: "Test"
+      color: "green"
+      footer: "Experiment Automator"
+      ts: true
+
+
+csv:
+  status: "enabled"
+  csv_format:
+    separator: ","
+
+# TODO Drive service settings will be updated
+drive:
+
+# Debug mode for development. It is not used in production.
+debug: true
+debug_traceback: false
