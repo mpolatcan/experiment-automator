@@ -1,9 +1,8 @@
 # TODO Migrate module from Test PyPi to original PyPi
 # TODO Plot figure saving
-# TODO Find image upload service and get link of image
 # TODO Write warnings for debugging and info user
 # TODO Parallel model training
-
+# TODO Detection of figure instances and storing them
 
 # ---------------------- Next features ----------------------
 # TODO Dropbox storage integration
@@ -43,6 +42,9 @@ class ExperimentAutomator:
             self.__prepare_experiment_params()
             self.__gen_experiment_param_combinations()
         except ConfigNotFoundException as ex:
+            print(ex)
+            self.__print_stacktrace()
+        except ImageUploaderException as ex:
             print(ex)
             self.__print_stacktrace()
 
@@ -102,14 +104,14 @@ class ExperimentAutomator:
 
                 results.update(attrs)
                 results.update(completion_time=datetime.now().strftime("%m/%d/%y %H:%M:%S"))
-                results.update(status=Constants.EXECUTION_STATUS_SUCCESS)
+                results.update(exec_status=Constants.EXECUTION_STATUS_SUCCESS)
                 results.update(error_cause="-")
 
                 DebugLogCat.log(self.debug, self.__class_name(), "Model training is completed successfully. Sending notification to Slack channel!")
 
                 # If model training completes successfully send notification to Slack channel, save result to log file
                 # and send them to Drive
-                self.slack_notifier.notify(Constants.KEY_SLACK_NOTIFICATION_SUCCESS)
+                self.slack_notifier.notify(Constants.KEY_SLACK_NOTIFICATION_SUCCESS, results)
                 self.csv_logger.save_results_to_csv(results)
             except ConfigNotFoundException as ex:
                 print(ex)
@@ -124,12 +126,12 @@ class ExperimentAutomator:
                 self.__print_stacktrace()
 
                 attrs.update(completion_time=datetime.now().strftime("%m/%d/%y %H:%M:%S"))
-                attrs.update(status=Constants.EXECUTION_STATUS_FAILED)
+                attrs.update(exec_status=Constants.EXECUTION_STATUS_FAILED)
                 attrs.update(error_cause=str(ex).replace("\n", " "))
 
                 DebugLogCat.log(self.debug, self.__class_name(), "Model training couldn't completed successfully. Sending notification to Slack channel!")
 
                 # If model training and evaluation terminates with error status send notification
-                self.slack_notifier.notify(Constants.KEY_SLACK_NOTIICATION_FAIL)
+                self.slack_notifier.notify(Constants.KEY_SLACK_NOTIFICATION_FAIL, attrs)
 
                 self.csv_logger.save_results_to_csv(attrs)

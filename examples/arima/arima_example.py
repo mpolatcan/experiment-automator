@@ -6,8 +6,6 @@ from math import sqrt
 
 
 def pipeline(attrs):
-    print(attrs)
-
     data = pd.read_csv(attrs["data_path"], header=0, parse_dates=[0], index_col=0)
 
     cpu_usage_data = data[["cpu_usage"]]

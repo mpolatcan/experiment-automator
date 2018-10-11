@@ -38,8 +38,11 @@ experiment:
       - true
       - false
 
-#slack:
+slack:
   webhook_url: https://hooks.slack.com/services/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
+  image_service:
+    client_id: ""
+    client_secret: ""
   notification_format:
     fail:
       pretext: "FAILED"
@@ -65,6 +68,7 @@ csv:
       - "name"
       - "surname"
       - "use_basinhopping"
+
 
 # TODO Drive service settings will be updated
 drive:
