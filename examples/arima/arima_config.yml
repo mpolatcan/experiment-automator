@@ -26,12 +26,7 @@ slack:
       name: "flickr"
       client_key: "143c4dbc51405995b737767e8af69ca3"
       client_secret: "0717d06b5d55c123"
-      request_token_url: "https://www.flickr.com/services/oauth/request_token"
-      authorize_url: "https://www.flickr.com/services/oauth/authorize"
-      access_token_url: "https://www.flickr.com/services/oauth/access_token"
-      base_url: "https://api.flickr.com/services/rest"
       access_token_path: "/Users/mutlu.polatcan/access_token.key"
-    upload_url: "https://up.flickr.com/services/upload/"
 
 csv:
   status: "enabled"

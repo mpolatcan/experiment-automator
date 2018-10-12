@@ -1,6 +1,6 @@
-from experiment_automator.constants import Constants
-from experiment_automator.exceptions import *
-from experiment_automator.utils import DebugLogCat
+from constants import ExperimentConstants, CSVReporterConstants
+from exceptions import *
+from utils import DebugLogCat
 from os.path import exists
 from os import makedirs
 from datetime import datetime
@@ -22,8 +22,8 @@ class CSVReporter:
     def __initialize_csv_report(self):
         DebugLogCat.log(self.debug, self.__class_name(), "Creating working directory for reporting results!")
 
-        work_dir = self.experiment_config.get(Constants.KEY_EXPERIMENT_WORKDIR, None)
-        experiment_name = self.experiment_config.get(Constants.KEY_EXPERIMENT_NAME, None)
+        work_dir = self.experiment_config.get(ExperimentConstants.KEY_EXPERIMENT_WORKDIR, None)
+        experiment_name = self.experiment_config.get(ExperimentConstants.KEY_EXPERIMENT_NAME, None)
 
         if experiment_name is None:
             raise ConfigNotFoundException("%s - Experiment name not found in config!" % self.__class_name())
@@ -83,22 +83,22 @@ class CSVReporter:
                                                fn=lambda file, column_name, values: report_file.write(str(values.get(column_name,"-"))))
 
     def save_results_to_csv(self, results):
-        csv_log_status = self.csv_config.get(Constants.KEY_CSV_STATUS, None)
+        csv_log_status = self.csv_config.get(CSVReporterConstants.KEY_CSV_STATUS, None)
 
-        if not (self.csv_config is None) and (csv_log_status == Constants.VALUE_CSV_ENABLED):
+        if not (self.csv_config is None) and (csv_log_status == CSVReporterConstants.VALUE_CSV_ENABLED):
             DebugLogCat.log(self.debug, self.__class_name(), "CSV is configured properly. Logging results...!")
 
             if self.report_dir is None:
                 self.__initialize_csv_report()
 
-            csv_format_config = self.csv_config.get(Constants.KEY_CSV_FORMAT, None)
+            csv_format_config = self.csv_config.get(CSVReporterConstants.KEY_CSV_FORMAT, None)
 
             if not (csv_format_config is None):
                 DebugLogCat.log(self.debug, self.__class_name(), "Founded csv format defined by user!")
 
                 self.__write_to_csv(results,
-                                    columns=csv_format_config.get(Constants.KEY_CSV_FORMAT_COLUMNS),
-                                    separator=csv_format_config.get(Constants.KEY_CSV_FORMAT_SEPARATOR))
+                                    columns=csv_format_config.get(CSVReporterConstants.KEY_CSV_FORMAT_COLUMNS),
+                                    separator=csv_format_config.get(CSVReporterConstants.KEY_CSV_FORMAT_SEPARATOR))
             else:
                 DebugLogCat.log(self.debug, self.__class_name(), "There is no csv format defined by user. Writing with default csv format!")
                 self.__write_to_csv(results)
