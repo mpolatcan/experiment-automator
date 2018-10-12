@@ -1,4 +1,4 @@
-# TODO Dropbox storage integration
+# TODO Dropbox storage integration (Dropbox has Python library)
 
 
 class DropboxStorage:

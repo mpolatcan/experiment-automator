@@ -1,7 +1,7 @@
-from exceptions import ImageUploaderException
-from constants import SlackConstants, OAuthConstants, FlickrConstants, OtherConstants
-from oauth_client import OAuthClient
-from utils import DebugLogCat
+from experiment_automator.exceptions import ImageUploaderException
+from experiment_automator.constants import SlackConstants, OAuthConstants, FlickrConstants, OtherConstants
+from experiment_automator.oauth_client import OAuthClient
+from experiment_automator.utils import DebugLogCat
 from xml.etree import ElementTree
 
 

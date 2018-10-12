@@ -7,6 +7,7 @@ class ExperimentConstants:
     KEY_EXPERIMENT_PARAMS = "params"
     KEY_EXPERIMENT_PARAM_RANGE = "range"
     KEY_EXPERIMENT_WORKDIR = "workdir"
+    KEY_EXPERIMENT_RESULTS = "results"
 
 
 class SlackConstants:
@@ -39,7 +40,8 @@ class SlackConstants:
     KEY_SLACK_NOTIFICATION_PRETEXT = "pretext"
     KEY_SLACK_NOTIFICATION_TITLE = "title"
     KEY_SLACK_NOTIFICATION_THUMB_URL = "thumb_url"
-    KEY_SLACK_NOTIFICATION_IMAGE = "image"
+    KEY_SLACK_NOTIFICATION_IMAGE_URL = "image_url"
+    KEY_SLACK_NOTIFICATION_IMAGE_PATH = "image_path"
     KEY_SLACK_NOTIFICATION_COLOR = "color"
     KEY_SLACK_NOTIFICATION_FOOTER = "footer"
     KEY_SLACK_NOTIFICATION_TS = "ts"
@@ -50,7 +52,8 @@ class SlackConstants:
     KEY_SLACK_FIELD_SHORT = "short"
     KEY_SLACK_IMAGE_SERVICE = "image_service"
     KEY_SLACK_IMAGE_SERVICE_UPLOAD_URL = "upload_url"
-    VALUE_SLACK_NOTIFICATION_FORMAT = "default"
+    VALUE_DEFAULT_SLACK_NOTIFICATION_FORMAT = "default"
+    KEY_SLACK_PAYLOAD = "slack_payload"
 
 
 class CSVReporterConstants:

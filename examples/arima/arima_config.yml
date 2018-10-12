@@ -23,7 +23,7 @@ slack:
   webhook_url: https://hooks.slack.com/services/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
   image_service:
     oauth:
-      name: "flickr"
+      service_name: "flickr"
       client_key: "143c4dbc51405995b737767e8af69ca3"
       client_secret: "0717d06b5d55c123"
       access_token_path: "/Users/mutlu.polatcan/access_token.key"

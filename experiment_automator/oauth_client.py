@@ -1,7 +1,7 @@
 from requests_oauthlib import OAuth1Session
-from constants import OAuthConstants
-from exceptions import OAuthException
-from utils import DebugLogCat
+from experiment_automator.constants import OAuthConstants
+from experiment_automator.exceptions import OAuthException
+from experiment_automator.utils import DebugLogCat
 from os.path import exists
 
 

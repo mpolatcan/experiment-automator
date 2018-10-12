@@ -1,11 +1,8 @@
 # TODO Migrate module from Test PyPi to original PyPi
-# TODO Plot figure saving
 # TODO Write warnings for debugging and info user
 # TODO Parallel model training
-# TODO Detection of figure instances and storing them
 
 # ---------------------- Next features ----------------------
-# TODO Dropbox storage integration (Dropbox has Python library)
 # TODO Different notification channels
 # TODO HTTP Communication
 # TODO Web based dashboard (Plotly visualization)
@@ -14,15 +11,17 @@
 from itertools import product
 from numpy import arange
 from datetime import datetime
+from typing import Callable
 import traceback
 
 # ---------------------------------------------------------------
-from constants import ExperimentConstants, SlackConstants, CSVReporterConstants, OtherConstants
-from slack_notifier import SlackNotifier
-from csv_reporter import CSVReporter
-from utils import DebugLogCat
-from config import Config
-from exceptions import *
+from experiment_automator.constants import ExperimentConstants, SlackConstants, CSVReporterConstants, OtherConstants
+from experiment_automator.slack_notifier import SlackNotifier
+from experiment_automator.csv_reporter import CSVReporter
+from experiment_automator.utils import DebugLogCat
+from experiment_automator.config import Config
+from experiment_automator.result_container import ResultContainer
+from experiment_automator.exceptions import *
 
 
 class ExperimentAutomator:
@@ -94,25 +93,38 @@ class ExperimentAutomator:
             self.experiment_params.append(dict(zip(experiment_params.keys(), experiment_attr_combination)))
 
     # Driver of the program
-    def run(self, fn):
+    def run(self, fn: Callable[[dict, ResultContainer], None]):
         for attrs in self.experiment_params:
             try:
                 # TODO Calculate elapsed time
-                results = fn(attrs)
+
+                results = ResultContainer()
+
+                # Execute ML pipeline given by user
+                fn(attrs, results)
+
+                model_results_payload = results.get_model_results_payload()
+                slack_payload = results.get_slack_payload()
+
+                now = datetime.now().strftime("%m/%d/%y %H:%M:%S")
+
+                # Merge attributes and other infos with model and slack payloads
+                slack_payload.update(attrs)
+                slack_payload.update(completion_time=now, exec_status=OtherConstants.EXECUTION_STATUS_SUCCESS, error_cause="-")
+
+                model_results_payload.update(attrs)
+                model_results_payload.update(completion_time=now, exec_status=OtherConstants.EXECUTION_STATUS_SUCCESS, error_cause="-")
 
                 DebugLogCat.log(self.debug, self.__class_name(), "Result message: %s" % str(results))
-
-                results.update(attrs)
-                results.update(completion_time=datetime.now().strftime("%m/%d/%y %H:%M:%S"))
-                results.update(exec_status=OtherConstants.EXECUTION_STATUS_SUCCESS)
-                results.update(error_cause="-")
-
                 DebugLogCat.log(self.debug, self.__class_name(), "Model training is completed successfully. Sending notification to Slack channel!")
+
+                DebugLogCat.log(self.debug, self.__class_name(), "Slack payload: %s" % slack_payload)
+                DebugLogCat.log(self.debug, self.__class_name(), "Model results payload: %s" % model_results_payload)
 
                 # If model training completes successfully send notification to Slack channel, save result to log file
                 # and send them to Drive
-                self.slack_notifier.notify(SlackConstants.KEY_SLACK_NOTIFICATION_SUCCESS, results)
-                self.csv_logger.save_results_to_csv(results)
+                self.slack_notifier.notify(SlackConstants.KEY_SLACK_NOTIFICATION_SUCCESS, slack_payload)
+                self.csv_logger.save_results_to_csv(model_results_payload)
             except ConfigNotFoundException as ex:
                 print(ex)
                 self.__print_stacktrace()
@@ -125,9 +137,7 @@ class ExperimentAutomator:
                 print(ex)
                 self.__print_stacktrace()
 
-                attrs.update(completion_time=datetime.now().strftime("%m/%d/%y %H:%M:%S"))
-                attrs.update(exec_status=OtherConstants.EXECUTION_STATUS_FAILED)
-                attrs.update(error_cause=str(ex).replace("\n", " "))
+                attrs.update(completion_time=datetime.now().strftime("%m/%d/%y %H:%M:%S"), exec_status=OtherConstants.EXECUTION_STATUS_FAILED, error_cause=str(ex).replace("\n", " "))
 
                 DebugLogCat.log(self.debug, self.__class_name(), "Model training couldn't completed successfully. Sending notification to Slack channel!")
 
@@ -135,3 +145,5 @@ class ExperimentAutomator:
                 self.slack_notifier.notify(SlackConstants.KEY_SLACK_NOTIFICATION_FAIL, attrs)
 
                 self.csv_logger.save_results_to_csv(attrs)
+
+                self.experiment_params.pop()
