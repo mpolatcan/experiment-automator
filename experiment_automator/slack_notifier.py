@@ -1,9 +1,7 @@
-from experiment_automator.constants import SlackConstants, OtherConstants, FlickrConstants
+from experiment_automator.constants import SlackConstants, OtherConstants, FlickrConstants, ExperimentConstants
 from experiment_automator.utils import DebugLogCat
 from experiment_automator.image_uploader import FlickrImageUploader
 from experiment_automator.exceptions import ImageUploaderException
-from copy import deepcopy
-from time import time
 from requests import post
 
 
@@ -19,68 +17,95 @@ class SlackNotifier:
 
     def __class_name(self):
         return self.__class__.__name__
-    
-    def __generate_notification_data(self, status, message):
-        notification_data = {}
-        notification_format = self.slack_config.get(SlackConstants.KEY_SLACK_NOTIFICATION_FORMAT, None)
 
-        if not (notification_format is None) and (notification_format != SlackConstants.VALUE_DEFAULT_SLACK_NOTIFICATION_FORMAT):
-            if notification_format.get(status, None) is not None:
-                notification_custom_formatted = deepcopy(notification_format.get(status, None))
+    def __create_slack_attachment(self, attachments, status, pretext=None, title=None, main_image=None, fields=None, footer=SlackConstants.VALUE_SLACK_NOTIFICATION_FOOTER):
+        # Default attributes of attachments
+        attachment = {
+            SlackConstants.KEY_SLACK_NOTIFICATION_COLOR: SlackConstants.VALUE_SLACK_NOTIFICATION_COLORS[status],
+            SlackConstants.KEY_SLACK_NOTIFICATION_FOOTER: footer
+        }
 
-                DebugLogCat.log(self.debug, self.__class_name(), "Founded notification format is defined by user for status \"%s\"!" % status)
+        # Set pretext of attachment if you want
+        if not (pretext is None):
+            attachment[SlackConstants.KEY_SLACK_NOTIFICATION_PRETEXT] = SlackConstants.VALUE_SLACK_NOTIFICATION_PRETEXTS[status]
 
-                footer_timestamp_add = notification_custom_formatted.get(SlackConstants.KEY_SLACK_NOTIFICATION_TS, None)
+        # Set title of attachment if you want
+        if not (title is None):
+            attachment[SlackConstants.KEY_SLACK_NOTIFICATION_TITLE] = title
 
-                if not (footer_timestamp_add is None) and footer_timestamp_add is True:
-                    notification_custom_formatted[SlackConstants.KEY_SLACK_NOTIFICATION_TS] = time()
-                else:
-                    notification_custom_formatted.pop(SlackConstants.KEY_SLACK_NOTIFICATION_TS, None)
-
-                if notification_image_link is not None:
-                    notification_custom_formatted[SlackConstants.KEY_SLACK_NOTIFICATION_IMAGE_URL] = notification_image_link
-
-                notification_data[SlackConstants.KEY_SLACK_ATTACHMENTS] = [notification_custom_formatted]
-            else:
-                DebugLogCat.log(self.debug, self.__class_name(), "There is no notification format defined by user for status \"%s\".Getting default notification" % status)
-
-                notification_data[SlackConstants.KEY_SLACK_ATTACHMENTS] = [SlackConstants.DEFAULT_NOTIFICATIONS.get(status)]
-        else:
-            DebugLogCat.log(self.debug, self.__class_name(), "There is no notification format defined by user. Getting default notification format!")
-            notification_data[SlackConstants.KEY_SLACK_ATTACHMENTS] = [SlackConstants.DEFAULT_NOTIFICATIONS.get(status)]
-
-        notification_data[SlackConstants.KEY_SLACK_ATTACHMENTS][0][SlackConstants.KEY_SLACK_FIELDS] = []
+        # Set main image of notification if it is available
+        if not (main_image is None):
+            image_url = self.image_uploader.upload_image(image_path=main_image, image_type=FlickrConstants.FLICKR_IMAGE_TYPE_ORIGINAL)
+            DebugLogCat.log(self.debug, self.__class_name(), "Retrieved url of figure: %s" % image_url)
+            attachment[SlackConstants.KEY_SLACK_NOTIFICATION_IMAGE_URL] = image_url
 
         # Adding notification fields
-        for (title, value) in message.items():
-            if (title in [OtherConstants.KEY_EXEC_STATUS, SlackConstants.KEY_SLACK_NOTIFICATION_IMAGE_PATH]) or \
-               (status == SlackConstants.KEY_SLACK_NOTIFICATION_SUCCESS and title == OtherConstants.KEY_ERROR_CAUSE):
-                continue
+        if not (fields is None):
+            attachment[SlackConstants.KEY_SLACK_FIELDS] = []
 
-            notification_data[SlackConstants.KEY_SLACK_ATTACHMENTS][0][SlackConstants.KEY_SLACK_FIELDS].append({
-                SlackConstants.KEY_SLACK_FIELD_TITLE: title,
-                SlackConstants.KEY_SLACK_FIELD_VALUE: str(value),
-                SlackConstants.KEY_SLACK_FIELD_SHORT: True
-            })
+            for (title, value) in fields.items():
+                if (title in [OtherConstants.KEY_EXEC_STATUS, SlackConstants.KEY_SLACK_MAIN_IMAGE,SlackConstants.KEY_SLACK_IMAGE_ATTACHMENTS]) or \
+                   (status == SlackConstants.KEY_SLACK_NOTIFICATION_SUCCESS and title == OtherConstants.KEY_ERROR_CAUSE):
+                    continue
 
-        if SlackConstants.KEY_SLACK_NOTIFICATION_IMAGE_PATH in message.keys() and message[OtherConstants.KEY_EXEC_STATUS] == OtherConstants.EXECUTION_STATUS_SUCCESS:
-            DebugLogCat.log(self.debug, self.__class_name(), "There is a figure in Slack payload named \"%s\"!" % message[SlackConstants.KEY_SLACK_NOTIFICATION_IMAGE_PATH])
+                attachment[SlackConstants.KEY_SLACK_FIELDS].append({
+                    SlackConstants.KEY_SLACK_FIELD_TITLE: title,
+                    SlackConstants.KEY_SLACK_FIELD_VALUE: str(value),
+                    SlackConstants.KEY_SLACK_FIELD_SHORT: True
+                })
 
-            image_url = self.image_uploader.upload_image(image_path=message[SlackConstants.KEY_SLACK_NOTIFICATION_IMAGE_PATH], image_type=FlickrConstants.FLICKR_IMAGE_TYPE_ORIGINAL)
-            notification_data[SlackConstants.KEY_SLACK_ATTACHMENTS][0][SlackConstants.KEY_SLACK_NOTIFICATION_IMAGE_URL] = image_url
+        attachments.append(attachment)
 
-            DebugLogCat.log(self.debug, self.__class_name(), "Retrieved url of figure: %s" % image_url)
+    def __create_slack_image_attachments(self, attachments, status, images):
+        if not (images is None) and status == SlackConstants.KEY_SLACK_NOTIFICATION_SUCCESS:
+            DebugLogCat.log(self.debug, self.__class_name(), "There is a figures in Slack payload named \"%s\"!" % images)
+
+            for (label, image_path) in images:
+                image_url = self.image_uploader.upload_image(image_path=image_path, image_type=FlickrConstants.FLICKR_IMAGE_TYPE_ORIGINAL)
+
+                DebugLogCat.log(self.debug, self.__class_name(), "Retrieved url of figure: %s" % image_url)
+
+                attachments.append({
+                    SlackConstants.KEY_SLACK_NOTIFICATION_TITLE: label,
+                    SlackConstants.KEY_SLACK_NOTIFICATION_TITLE_LINK: image_url,
+                    SlackConstants.KEY_SLACK_NOTIFICATION_THUMB_URL: image_url,
+                    SlackConstants.KEY_SLACK_NOTIFICATION_COLOR: SlackConstants.VALUE_SLACK_NOTIFICATION_COLORS[status]
+                })
         else:
             DebugLogCat.log(self.debug, self.__class_name(), "There is no figure in Slack payload!")
+
+    def __generate_notification_data(self, status, payload):
+        notification_data = {SlackConstants.KEY_SLACK_ATTACHMENTS: []}
+
+        attachments = notification_data.get(SlackConstants.KEY_SLACK_ATTACHMENTS)
+
+        # Create attachment for model results
+        self.__create_slack_attachment(attachments=attachments,
+                                       status=status,
+                                       pretext=SlackConstants.VALUE_SLACK_NOTIFICATION_PRETEXTS[status],
+                                       title=SlackConstants.VALUE_SLACK_NOTIFICATION_TITLE_RESULTS,
+                                       main_image=payload.get(SlackConstants.KEY_SLACK_MAIN_IMAGE, None),
+                                       fields=payload.get(ExperimentConstants.KEY_EXPERIMENT_RESULTS, None))
+
+        # Create attachment for additional figures
+        self.__create_slack_image_attachments(attachments=attachments,
+                                              status=status,
+                                              images=payload.get(SlackConstants.KEY_SLACK_IMAGE_ATTACHMENTS, None))
+
+        # Create attachment for model parameters
+        self.__create_slack_attachment(attachments=attachments,
+                                       status=status,
+                                       title=SlackConstants.VALUE_SLACK_NOTIFICATION_TITLE_PARAMS,
+                                       fields=payload.get(ExperimentConstants.KEY_EXPERIMENT_PARAMS, None))
 
         DebugLogCat.log(self.debug, self.__class_name(), "Generated notification is \"%s\"" % str(notification_data))
 
         return notification_data
 
-    def notify(self, status, message):
+    def notify(self, status, payload):
         if not (self.slack_config is None) and not (self.slack_config.get(SlackConstants.KEY_SLACK_WEBHOOK_URL) is None):
             DebugLogCat.log(self.debug, self.__class_name(), "Slack configured properly. We send notification to Slack channel!")
 
-            post(str(self.slack_config.get(SlackConstants.KEY_SLACK_WEBHOOK_URL)), json=self.__generate_notification_data(status, message))
+            post(str(self.slack_config.get(SlackConstants.KEY_SLACK_WEBHOOK_URL)), json=self.__generate_notification_data(status, payload))
         else:
             DebugLogCat.log(self.debug, self.__class_name(), "There is no configuration for Slack. So we can't send notification to Slack channel!")

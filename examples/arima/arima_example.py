@@ -24,12 +24,18 @@ def pipeline(attrs: dict, results: ResultContainer):
     predictions = model_fit.predict(start=train_data_count, end=len(cpu_usage_data)-1)
 
     # Saving figure
-    fig = figure(1, figsize=(15, 10))
-    plot(test_data[:500])
-    plot(predictions[:500])
-    fig.savefig("predictions-p-%s-d-%s-q-%s-per-%s.png" %
-                (attrs["arima_p_value"], attrs["arima_d_value"], attrs["arima_q_value"], attrs["train_data_percentage"]))
-    fig.clear()
+    fig_result = figure(1, figsize=(10, 6))
+    plot(test_data[:100])
+    plot(predictions[:100])
+    fig_result.savefig("result-p-%s-d-%s-q-%s-per-%s.png" % (attrs["arima_p_value"], attrs["arima_d_value"], attrs["arima_q_value"], attrs["train_data_percentage"]))
+    fig_result.savefig("result.png")
+    fig_result.clear()
+
+    fig_predict = figure(1, figsize=(10, 6))
+    plot(predictions[:100])
+    fig_predict.savefig("predictions-only-p-%s-d-%s-q-%s-per-%s.png" % (attrs["arima_p_value"], attrs["arima_d_value"], attrs["arima_q_value"], attrs["train_data_percentage"]))
+    fig_predict.savefig("only-predict.png")
+    fig_predict.clear()
 
     mse = mean_squared_error(test_data, predictions)
     rmse = sqrt(mse)
@@ -39,9 +45,9 @@ def pipeline(attrs: dict, results: ResultContainer):
     results.add_model_result("rmse", rmse)
 
     # Add your prediction plot to Slack attachment
-    results.set_slack_attachment_image("predictions-p-%s-d-%s-q-%s-per-%s.png" % (attrs["arima_p_value"], attrs["arima_d_value"], attrs["arima_q_value"], attrs["train_data_percentage"]))
+    results.set_main_slack_attachment_image(path="result-p-%s-d-%s-q-%s-per-%s.png" % (attrs["arima_p_value"], attrs["arima_d_value"], attrs["arima_q_value"], attrs["train_data_percentage"]))
+    results.add_slack_attachment_image(image_label="only-prediction", path="predictions-only-p-%s-d-%s-q-%s-per-%s.png" % (attrs["arima_p_value"], attrs["arima_d_value"], attrs["arima_q_value"], attrs["train_data_percentage"]))
 
 
 if __name__ == "__main__":
-    # Write your logic to here !!! :)
     ExperimentAutomator("arima_config.yml").run(pipeline)

@@ -1,6 +1,3 @@
-import time
-
-
 class ExperimentConstants:
     KEY_EXPERIMENT = "experiment"
     KEY_EXPERIMENT_NAME = "name"
@@ -11,27 +8,6 @@ class ExperimentConstants:
 
 
 class SlackConstants:
-    # TODO Edit default Slack notifications
-    DEFAULT_NOTIFICATIONS = {
-        "success": {
-            "pretext": "Info from Experiment Automator",
-            "title": "Model Training Success!",
-            "text": "",
-            "thumb_url": "",
-            "color": "#7CD197",
-            "footer": "Experiment Automator",
-            "time": time.time()
-        },
-        "fail": {
-            "pretext": "Info from Experiment Automator",
-            "title": "Model Training Failed!",
-            "text": "",
-            "thumb_url": "",
-            "color": "#F35A00",
-            "footer": "Experiment Automator",
-            "time": time.time()
-        }
-    }
     KEY_SLACK = "slack"
     KEY_SLACK_NOTIFICATION_FORMAT = "notification_format"
     KEY_SLACK_WEBHOOK_URL = "webhook_url"
@@ -39,21 +15,33 @@ class SlackConstants:
     KEY_SLACK_NOTIFICATION_FAIL = "fail"
     KEY_SLACK_NOTIFICATION_PRETEXT = "pretext"
     KEY_SLACK_NOTIFICATION_TITLE = "title"
+    KEY_SLACK_NOTIFICATION_TITLE_LINK = "title_link"
     KEY_SLACK_NOTIFICATION_THUMB_URL = "thumb_url"
     KEY_SLACK_NOTIFICATION_IMAGE_URL = "image_url"
-    KEY_SLACK_NOTIFICATION_IMAGE_PATH = "image_path"
     KEY_SLACK_NOTIFICATION_COLOR = "color"
     KEY_SLACK_NOTIFICATION_FOOTER = "footer"
     KEY_SLACK_NOTIFICATION_TS = "ts"
     KEY_SLACK_ATTACHMENTS = "attachments"
+    KEY_SLACK_IMAGE_ATTACHMENTS = "image_attachments"
+    KEY_SLACK_MAIN_IMAGE = "main_image"
     KEY_SLACK_FIELDS = "fields"
     KEY_SLACK_FIELD_TITLE = "title"
     KEY_SLACK_FIELD_VALUE = "value"
     KEY_SLACK_FIELD_SHORT = "short"
     KEY_SLACK_IMAGE_SERVICE = "image_service"
-    KEY_SLACK_IMAGE_SERVICE_UPLOAD_URL = "upload_url"
-    VALUE_DEFAULT_SLACK_NOTIFICATION_FORMAT = "default"
     KEY_SLACK_PAYLOAD = "slack_payload"
+    KEY_SLACK_IMAGE_SERVICE_UPLOAD_URL = "upload_url"
+    VALUE_SLACK_NOTIFICATION_COLORS = {
+        KEY_SLACK_NOTIFICATION_SUCCESS: "#7CD197",
+        KEY_SLACK_NOTIFICATION_FAIL: "#F35A00"
+    }
+    VALUE_SLACK_NOTIFICATION_PRETEXTS = {
+        KEY_SLACK_NOTIFICATION_SUCCESS: "Model training successfully completed!",
+        KEY_SLACK_NOTIFICATION_FAIL: "Model training failed!"
+    }
+    VALUE_SLACK_NOTIFICATION_TITLE_RESULTS = "================= RESULTS =================\n"
+    VALUE_SLACK_NOTIFICATION_TITLE_PARAMS = "=============== PARAMETERS ===============\n"
+    VALUE_SLACK_NOTIFICATION_FOOTER = "Experiment Automator"
 
 
 class CSVReporterConstants:
@@ -105,6 +93,9 @@ class FlickrConstants:
 class OtherConstants:
     KEY_DEBUG = "debug"
     KEY_DEBUG_TRACEBACK = "debug_traceback"
+    KEY_START_TIME = "start_time"
+    KEY_ELAPSED_TIME = "elapsed_time"
+    KEY_COMPLETION_TIME = "completion_time"
     KEY_EXEC_STATUS = "exec_status"
     KEY_ERROR_CAUSE = "error_cause"
     EXECUTION_STATUS_SUCCESS = "SUCCESS"

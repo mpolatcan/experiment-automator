@@ -1,6 +1,8 @@
 # TODO Migrate module from Test PyPi to original PyPi
 # TODO Write warnings for debugging and info user
 # TODO Parallel model training
+# TODO Database integration (Document store)
+# TODO Distributed task queue (Celery) integration for training models, upload files to Dropbox, Drive, Flickr and sending notifications to Slack
 
 # ---------------------- Next features ----------------------
 # TODO Different notification channels
@@ -12,6 +14,7 @@ from itertools import product
 from numpy import arange
 from datetime import datetime
 from typing import Callable
+from time import time, gmtime, strftime
 import traceback
 
 # ---------------------------------------------------------------
@@ -96,26 +99,41 @@ class ExperimentAutomator:
     def run(self, fn: Callable[[dict, ResultContainer], None]):
         for attrs in self.experiment_params:
             try:
-                # TODO Calculate elapsed time
+                start = time()
+                start_time = datetime.now().strftime("%m/%d/%y %H:%M:%S")
 
                 results = ResultContainer()
 
                 # Execute ML pipeline given by user
                 fn(attrs, results)
 
+                end = time()
+
+                completion_time = datetime.now().strftime("%m/%d/%y %H:%M:%S")
+                elapsed_time = strftime("%H:%M:%S", gmtime(end - start))
+
+                common_data = {
+                    OtherConstants.KEY_START_TIME: start_time,
+                    OtherConstants.KEY_COMPLETION_TIME: completion_time,
+                    OtherConstants.KEY_ELAPSED_TIME: elapsed_time,
+                    OtherConstants.KEY_ERROR_CAUSE: "-"
+                }
+
                 model_results_payload = results.get_model_results_payload()
                 slack_payload = results.get_slack_payload()
 
-                now = datetime.now().strftime("%m/%d/%y %H:%M:%S")
+                # Merge parameters with Slack payload
+                slack_payload.update({ExperimentConstants.KEY_EXPERIMENT_PARAMS: attrs})
+                # Merge other infos with Slack payload
+                slack_payload.get(ExperimentConstants.KEY_EXPERIMENT_RESULTS).update(common_data)
 
-                # Merge attributes and other infos with model and slack payloads
-                slack_payload.update(attrs)
-                slack_payload.update(completion_time=now, exec_status=OtherConstants.EXECUTION_STATUS_SUCCESS, error_cause="-")
-
+                # Merge parameters with model results payload
                 model_results_payload.update(attrs)
-                model_results_payload.update(completion_time=now, exec_status=OtherConstants.EXECUTION_STATUS_SUCCESS, error_cause="-")
+                # Merge other infos with model results payload
+                model_results_payload.update(common_data)
+                # Additional exec status added to model results payload
+                model_results_payload.update({OtherConstants.KEY_EXEC_STATUS: OtherConstants.EXECUTION_STATUS_SUCCESS})
 
-                DebugLogCat.log(self.debug, self.__class_name(), "Result message: %s" % str(results))
                 DebugLogCat.log(self.debug, self.__class_name(), "Model training is completed successfully. Sending notification to Slack channel!")
 
                 DebugLogCat.log(self.debug, self.__class_name(), "Slack payload: %s" % slack_payload)
@@ -137,13 +155,32 @@ class ExperimentAutomator:
                 print(ex)
                 self.__print_stacktrace()
 
-                attrs.update(completion_time=datetime.now().strftime("%m/%d/%y %H:%M:%S"), exec_status=OtherConstants.EXECUTION_STATUS_FAILED, error_cause=str(ex).replace("\n", " "))
+                end = time()
+
+                common_data = {
+                    OtherConstants.KEY_START_TIME: start_time,
+                    OtherConstants.KEY_COMPLETION_TIME: datetime.now().strftime("%m/%d/%y %H:%M:%S"),
+                    OtherConstants.KEY_ELAPSED_TIME: strftime("%H:%M:%S", gmtime(end - start)),
+                    OtherConstants.KEY_ERROR_CAUSE: "\"%s\"" % str(ex).replace("\n", " ")
+                }
+
+                # Merge parameters and other infos with model results payload
+                model_results_payload = {}
+                model_results_payload.update(attrs)
+                model_results_payload.update(common_data)
+                model_results_payload.update({OtherConstants.KEY_EXEC_STATUS: OtherConstants.EXECUTION_STATUS_FAILED})
+
+                # Merge parameters and other infos with Slack payload
+                slack_payload = {
+                    ExperimentConstants.KEY_EXPERIMENT_PARAMS: attrs,
+                    ExperimentConstants.KEY_EXPERIMENT_RESULTS: common_data
+                }
 
                 DebugLogCat.log(self.debug, self.__class_name(), "Model training couldn't completed successfully. Sending notification to Slack channel!")
 
                 # If model training and evaluation terminates with error status send notification
-                self.slack_notifier.notify(SlackConstants.KEY_SLACK_NOTIFICATION_FAIL, attrs)
-
-                self.csv_logger.save_results_to_csv(attrs)
-
-                self.experiment_params.pop()
+                self.slack_notifier.notify(SlackConstants.KEY_SLACK_NOTIFICATION_FAIL, slack_payload)
+                self.csv_logger.save_results_to_csv(model_results_payload)
+            finally:
+                # TODO Remove parameters from list
+                pass

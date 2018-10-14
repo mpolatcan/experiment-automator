@@ -20,7 +20,7 @@ experiment:
 
 
 slack:
-  webhook_url: https://hooks.slack.com/services/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
+  webhook_url: https://hooks.slack.com/services/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
   image_service:
     oauth:
       service_name: "flickr"
