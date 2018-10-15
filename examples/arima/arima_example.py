@@ -39,8 +39,8 @@ def pipeline(attrs: dict, results: ResultContainer):
     results.add_model_result("rmse", rmse)
 
     # Add your prediction plot to Slack attachment
-    results.set_main_slack_attachment_image(image_label="result", figure=fig_result)
-    results.add_slack_attachment_image(image_label="only-prediction", figure=fig_predict)
+    results.set_slack_main_figure(image_label="result", figure=fig_result)
+    results.add_figure(image_label="only-prediction", figure=fig_predict)
 
 
 if __name__ == "__main__":

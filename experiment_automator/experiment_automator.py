@@ -119,7 +119,7 @@ class ExperimentAutomator:
                     OtherConstants.KEY_ERROR_CAUSE: "-"
                 }
 
-                model_results_payload = results.get_model_results_payload()
+                experiment_results_payload = results.get_experiment_results_payload()
                 slack_payload = results.get_slack_payload()
 
                 # Merge parameters with Slack payload
@@ -127,22 +127,22 @@ class ExperimentAutomator:
                 # Merge other infos with Slack payload
                 slack_payload.get(ExperimentConstants.KEY_EXPERIMENT_RESULTS).update(common_data)
 
-                # Merge parameters with model results payload
-                model_results_payload.update(attrs)
-                # Merge other infos with model results payload
-                model_results_payload.update(common_data)
-                # Additional exec status added to model results payload
-                model_results_payload.update({OtherConstants.KEY_EXEC_STATUS: OtherConstants.EXECUTION_STATUS_SUCCESS})
+                # Merge parameters with experiment results payload
+                experiment_results_payload.update(attrs)
+                # Merge other infos with experiment results payload
+                experiment_results_payload.update(common_data)
+                # Additional exec status added to experiment results payload
+                experiment_results_payload.update({OtherConstants.KEY_EXEC_STATUS: OtherConstants.EXECUTION_STATUS_SUCCESS})
 
                 DebugLogCat.log(self.debug, self.__class_name(), "Model training is completed successfully. Sending notification to Slack channel!")
 
                 DebugLogCat.log(self.debug, self.__class_name(), "Slack payload: %s" % slack_payload)
-                DebugLogCat.log(self.debug, self.__class_name(), "Model results payload: %s" % model_results_payload)
+                DebugLogCat.log(self.debug, self.__class_name(), "Model results payload: %s" % experiment_results_payload)
 
                 # If model training completes successfully send notification to Slack channel, save result to log file
                 # and send them to Drive
                 self.slack_notifier.notify(SlackConstants.KEY_SLACK_NOTIFICATION_SUCCESS, slack_payload)
-                self.csv_logger.save_results_to_csv(model_results_payload)
+                self.csv_logger.save_results_to_csv(experiment_results_payload)
             except ConfigNotFoundException as ex:
                 print(ex)
                 self.__print_stacktrace()
@@ -164,11 +164,11 @@ class ExperimentAutomator:
                     OtherConstants.KEY_ERROR_CAUSE: "\"%s\"" % str(ex).replace("\n", " ")
                 }
 
-                # Merge parameters and other infos with model results payload
-                model_results_payload = {}
-                model_results_payload.update(attrs)
-                model_results_payload.update(common_data)
-                model_results_payload.update({OtherConstants.KEY_EXEC_STATUS: OtherConstants.EXECUTION_STATUS_FAILED})
+                # Merge parameters and other infos with experiment results payload
+                experiment_results_payload = {}
+                experiment_results_payload.update(attrs)
+                experiment_results_payload.update(common_data)
+                experiment_results_payload.update({OtherConstants.KEY_EXEC_STATUS: OtherConstants.EXECUTION_STATUS_FAILED})
 
                 # Merge parameters and other infos with Slack payload
                 slack_payload = {
@@ -180,7 +180,7 @@ class ExperimentAutomator:
 
                 # If model training and evaluation terminates with error status send notification
                 self.slack_notifier.notify(SlackConstants.KEY_SLACK_NOTIFICATION_FAIL, slack_payload)
-                self.csv_logger.save_results_to_csv(model_results_payload)
+                self.csv_logger.save_results_to_csv(experiment_results_payload)
             finally:
                 # TODO Remove parameters from list
                 pass
