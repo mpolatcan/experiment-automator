@@ -1,10 +1,8 @@
 # TODO Write warnings for debugging and info user
 # TODO Parallel model training
-# TODO Database integration (Document store)
 # TODO Distributed task queue (Celery) integration for async tasks
 
 # ---------------------- Next features ----------------------
-# TODO Migrate module from Test PyPi to original PyPi
 # TODO Different notification channels
 # TODO HTTP Communication
 # TODO Web based dashboard (Plotly visualization)
@@ -18,9 +16,10 @@ from time import time, gmtime, strftime
 import traceback
 
 # ---------------------------------------------------------------
-from experiment_automator.constants import ExperimentConstants, SlackConstants, CSVReporterConstants, OtherConstants
+from experiment_automator.constants import ExperimentConstants, SlackConstants, CSVReporterConstants, OtherConstants, MongoDBConstants
 from experiment_automator.slack_notifier import SlackNotifier
 from experiment_automator.csv_reporter import CSVReporter
+from experiment_automator.db_storage import DBStorage
 from experiment_automator.utils import DebugLogCat
 from experiment_automator.config import Config
 from experiment_automator.result_container import ResultContainer
@@ -41,6 +40,9 @@ class ExperimentAutomator:
             self.csv_logger = CSVReporter(self.debug,
                                           self.config.get_dict(ExperimentConstants.KEY_EXPERIMENT),
                                           self.config.get_dict(CSVReporterConstants.KEY_CSV))
+            self.db_storage = DBStorage(self.debug,
+                                        self.config.get_dict(ExperimentConstants.KEY_EXPERIMENT).get(ExperimentConstants.KEY_EXPERIMENT_NAME),
+                                        self.config.get_dict(MongoDBConstants.KEY_MONGODB))
             self.__prepare_experiment_params()
             self.__gen_experiment_param_combinations()
         except ConfigNotFoundException as ex:
@@ -78,7 +80,7 @@ class ExperimentAutomator:
                 # Generating values from range specification
                 gen_values = []
                 for val in arange(range_spec[0], range_spec[1] + range_spec[2], range_spec[2]):
-                    gen_values.append(val)
+                    gen_values.append(val.item())
 
                 experiment_params[experiment_param_name] = gen_values
 
@@ -143,6 +145,7 @@ class ExperimentAutomator:
                 # and send them to Drive
                 self.slack_notifier.notify(SlackConstants.KEY_SLACK_NOTIFICATION_SUCCESS, slack_payload)
                 self.csv_logger.save_results_to_csv(experiment_results_payload)
+                self.db_storage.insert_model_results(experiment_results_payload)
             except ConfigNotFoundException as ex:
                 print(ex)
                 self.__print_stacktrace()
@@ -181,6 +184,6 @@ class ExperimentAutomator:
                 # If model training and evaluation terminates with error status send notification
                 self.slack_notifier.notify(SlackConstants.KEY_SLACK_NOTIFICATION_FAIL, slack_payload)
                 self.csv_logger.save_results_to_csv(experiment_results_payload)
+                self.db_storage.insert_model_results(experiment_results_payload)
             finally:
-                # TODO Remove parameters from list
-                pass
+                self.experiment_params.pop()

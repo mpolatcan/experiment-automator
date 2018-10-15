@@ -1,23 +1,21 @@
-# Experiment Automator config examples for statsmodels's Holt Winters
-# Range type -> [(min,max,precision(number of values)]
-
 experiment:
-  name: "arima-experiment"
+  name: "holt-winters"
   workdir: "/Users/mutlu.polatcan/"
   params:
-  # ------------- MODEL PARAMS --------------
+    # --------------- MODEL PARAMS ------------
     data_path:
       - "../../example_datas/example_data.csv"
     train_data_percentage:
       range: [60,75,5]
-    arima_p_value:
-      range: [1,5,1]
-    arima_q_value:
-      range: [1,5,1]
-    arima_d_value:
-      range: [1,2,1]
-  # ------------- FIT PARAMS --------------
-
+    smoothing_level:
+      range: [0.1,0.9,0.1]
+    smoothing_slope:
+      range: [0.1,0.9,0.1]
+    damping_slope:
+      range: [0.1,0.9,0.1]
+    optimized:
+      - true
+      - false
 
 slack:
   webhook_url: https://hooks.slack.com/services/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
@@ -40,9 +38,5 @@ csv:
   csv_format:
     separator: ","
 
-# TODO Drive service settings will be updated
-drive:
-
-# Debug mode for development. It is not used in production.
 debug: true
 debug_traceback: false

@@ -1,11 +1,11 @@
 from experiment_automator.experiment_automator import ExperimentAutomator
-import pandas as pd
 from experiment_automator.result_container import ResultContainer
 from statsmodels.tsa.arima_model import ARIMA
 from sklearn.metrics import mean_squared_error
 from matplotlib.pylab import figure
 from matplotlib.pyplot import plot
 from math import sqrt
+import pandas as pd
 
 
 def pipeline(attrs: dict, results: ResultContainer):

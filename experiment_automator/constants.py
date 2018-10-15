@@ -101,3 +101,12 @@ class OtherConstants:
     EXECUTION_STATUS_SUCCESS = "SUCCESS"
     EXECUTION_STATUS_FAILED = "FAILED"
     IMAGE_SERVICE_FLICKR = "flickr"
+
+
+class MongoDBConstants:
+    KEY_MONGODB = "mongodb"
+    KEY_MONGODB_HOST = "host"
+    KEY_MONGODB_PORT = "port"
+    KEY_MONGODB_USERNAME = "username"
+    KEY_MONGODB_PASSWORD = "password"
+

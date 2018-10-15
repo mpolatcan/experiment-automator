@@ -16,5 +16,12 @@ setuptools.setup(
     long_description_content_type=config["long_description_content_type"],
     url=config["url"],
     packages=setuptools.find_packages(),
-    classifiers=config["classifiers"]
+    classifiers=config["classifiers"],
+    install_requires=[
+        'matplotlib',
+        'pyyaml',
+        'numpy',
+        'requests',
+        'requests_oauthlib'
+    ],
 )

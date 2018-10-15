@@ -1,3 +1,7 @@
+import matplotlib
+
+matplotlib.use('Agg')
+
 from typing import Any, AnyStr
 from matplotlib.figure import Figure
 from datetime import datetime
