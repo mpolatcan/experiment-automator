@@ -1,10 +1,10 @@
-# TODO Migrate module from Test PyPi to original PyPi
 # TODO Write warnings for debugging and info user
 # TODO Parallel model training
 # TODO Database integration (Document store)
-# TODO Distributed task queue (Celery) integration for training models, upload files to Dropbox, Drive, Flickr and sending notifications to Slack
+# TODO Distributed task queue (Celery) integration for async tasks
 
 # ---------------------- Next features ----------------------
+# TODO Migrate module from Test PyPi to original PyPi
 # TODO Different notification channels
 # TODO HTTP Communication
 # TODO Web based dashboard (Plotly visualization)
@@ -102,7 +102,7 @@ class ExperimentAutomator:
                 start = time()
                 start_time = datetime.now().strftime("%m/%d/%y %H:%M:%S")
 
-                results = ResultContainer()
+                results = ResultContainer(attrs)
 
                 # Execute ML pipeline given by user
                 fn(attrs, results)
